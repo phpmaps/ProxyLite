@@ -1,1 +1,1 @@
-#ProxyLite Project for PHP
+#ProxyLite Project
