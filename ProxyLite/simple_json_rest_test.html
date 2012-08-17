@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<title>Simple REST / JSON Request Using ProxyLite</title>
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+
+
+<style type="text/css">
+html,body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+p {
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+textarea {
+	margin: 4px; border : none;
+	width: 98%;
+	height: 68%;
+	border: none;
+}
+
+#title {
+	margin: 0 0 1% 1%;
+}
+
+#title span {
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 46px;
+}
+
+#wrapper {
+	background-color: #CCC;
+	padding-left: 2%;
+	border: 1px solid #000; width: 97%;
+	height: 80%;
+	margin: 0 auto;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+}
+
+#content {
+	background-color: #FFF;
+	border: 1px solid #000;
+	width: 60%;
+	height: 72%;
+	margin: 0, 0, 18, 18;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+}
+
+.small.button,.small.button:visited {
+	font-size: 11px
+}
+
+.button,.button:visited,.medium.button,.medium.button:visited {
+	line-height: 1;
+}
+
+.large.button,.large.button:visited {
+	font-size: 14px;
+	padding: 8px 14px 9px;
+}
+
+.super.button,.super.button:visited {
+	font-size: 34px;
+	padding: 8px 14px 9px;
+}
+</style>
+
+<script type="text/javascript">
+	var dojoConfig = {
+		isDebug : true
+	};
+</script>
+
+<link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dijit/themes/claro/claro.css">
+
+<script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
+
+<script type="text/javascript">
+	dojo.addOnLoad(function() {
+		esri.config.defaults.io.proxyUrl = "/includes/php/proxy.php";
+		esri.config.defaults.io.alwaysUseProxy = true;
+		dojo.byId("url").value = "http://sampleserver5.arcgisonline.com/ArcGIS/rest/services/Energy/HSEC/FeatureServer";
+		dojo.byId("results").value = "";
+	});
+
+	function getTestProxy() {
+		dojo.byId("results").value = "";
+		dojo.removeClass(dojo.byId("results"), "failure");
+		dojo.byId("status").innerHTML = "Downloading...";
+
+		var url = esri.urlToObject(dojo.byId("url").value);
+		var requestHandle = esri.request({
+			url : url.path,
+			content : {
+				f : 'json',
+				client : 'referer',
+				'referer' : document.location,
+				username : 'arcgis',
+				password : 'arcgis'
+			},
+			load : requestSucceeded,
+			error : requestFailed
+		});
+	}
+
+	function requestSucceeded(response, io) {
+		console.log("Succeeded: ", response);
+		requestCompleted();
+		dojo.toJsonIndentStr = " ";
+		dojo.byId("results").value = dojo.toJson(response, true);
+	}
+
+	function requestFailed(error, io) {
+		console.log("Failed: ", error);
+		dojo.addClass(dojo.byId("results"), "failure");
+		requestCompleted();
+
+		dojo.toJsonIndentStr = " ";
+		dojo.byId("results").value = dojo.toJson(error, true);
+	}
+
+	function requestCompleted() {
+		dojo.byId("status").innerHTML = "Done.";
+		var reset = function() {
+			dojo.byId("status").innerHTML = "";
+		};
+		setTimeout(reset, 2000);
+	}
+</script>
+
+</head>
+<body>
+	<div id="title"><span>Simple REST / JSON Request Using ProxyLite</span></div>
+	
+	<div id="wrapper">
+	
+		<p>URL here: <input type="text" id="url" size="120" /> <input class="button" type="button" value="Test Proxy" onclick="getTestProxy();" /> <span id="status"></span></p>
+		
+		<p><u>Content</u></p>
+		
+		<div id="content"><textarea id="results"></textarea></div>
+	
+	</div>
+
+</body>
+
+</html>
