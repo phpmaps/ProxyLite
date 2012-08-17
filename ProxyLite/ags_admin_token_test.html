@@ -1,0 +1,115 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=7, IE=9" />
+<!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+	on iOS devices-->
+<meta name="viewport"
+	content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+<title>ArcGIS Server Admin Test Token</title>
+
+<script type="text/javascript"> 
+	var dojoConfig = { isDebug: true }; 
+	</script>
+<link rel="stylesheet" type="text/css"
+	href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dijit/themes/claro/claro.css">
+
+<script type="text/javascript"
+	src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
+
+
+
+<style type="text/css">
+#content {
+	width: 400px;
+	height: 350px;
+	padding: 5px;
+	overflow: auto;
+	border: solid 2px #AAAAAA;
+	background-color: #FFFFFF;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-o-border-radius: 5px;
+	border-radius: 5px;
+	-moz-box-shadow: 0 0 0.5em black;
+	-webkit-box-shadow: 0 0 0.5em black;
+	-o-box-shadow: 0 0 0.5em black;
+	box-shadow: 0 0 0.5em black;
+}
+
+.failure {
+	color: red;
+}
+
+#status {
+	font-size: 12px;
+}
+</style>
+
+<script type="text/javascript"> 
+	esri.config.defaults.io.proxyUrl = "proxy.php"; 
+	
+	dojo.addOnLoad(function() { 
+		dojo.byId("tokenurl").value = "http://seafoam:6080/arcgis/admin/generateToken";
+		dojo.byId("content").value = ""; 
+	}); 
+ 
+	
+	function getAdminToken() { 
+		dojo.byId("content").value = ""; 
+		dojo.removeClass(dojo.byId("content"), "failure"); 
+		dojo.byId("status").innerHTML = "Downloading..."; 
+		
+		var url = esri.urlToObject(dojo.byId("tokenurl").value); 
+		var requestHandle = esri.request({ 
+			url: url.path,
+			content: {f:'json',client:'referer','referer': document.location, username:'arcgis', password:'arcgis'},  
+			load: requestSucceeded, 
+			error: requestFailed 
+		}); 
+	}
+	
+	function requestSucceeded(response, io) { 
+		console.log("Succeeded: ", response); 
+		requestCompleted(); 
+		dojo.toJsonIndentStr = " "; 
+		dojo.byId("content").value = dojo.toJson(response, true); 
+	} 
+	
+	function requestFailed(error, io) { 
+		console.log("Failed: ", error); 
+		dojo.addClass(dojo.byId("content"), "failure"); 
+		requestCompleted(); 
+		
+		dojo.toJsonIndentStr = " "; 
+		dojo.byId("content").value = dojo.toJson(error, true); 
+	} 
+	
+	function requestCompleted() { 
+		dojo.byId("status").innerHTML = "Done."; 
+		var reset = function() { 
+			dojo.byId("status").innerHTML = ""; 
+		}; 
+		setTimeout(reset, 2000); 
+	} 
+	
+	</script>
+</head>
+
+<body class="claro"
+	style="font-family: Arial Unicode MS, Arial, sans-serif;">
+<p>Token URL here: <input type="text" id="tokenurl" size="75" /> <input
+	type="button" value="Esri Request Token" onclick="getAdminToken();" />
+
+<span id="status"></span></p>
+
+<p>Content:</p>
+<textarea id="content"></textarea>
+
+</body>
+</html>
+
+
